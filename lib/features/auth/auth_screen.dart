@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/routes/app_router.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -10,7 +11,20 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
+
+  String? _validateInput(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'This field is required';
+    }
+    // Prevent common SQL injection characters
+    final sqlInjectionPattern = RegExp(r"['\x22;=]|(--)", caseSensitive: false);
+    if (sqlInjectionPattern.hasMatch(value)) {
+      return 'Invalid characters detected';
+    }
+    return null;
+  }
 
   @override
   void initState() {
@@ -33,11 +47,13 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
               // Logo
               Container(
                 width: 64,
@@ -47,7 +63,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -78,7 +94,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 'Access your emergency response dashboard.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textPrimary.withOpacity(0.8),
+                  color: AppColors.textPrimary.withValues(alpha: 0.8),
                 ),
               ),
               const SizedBox(height: 24),
@@ -89,7 +105,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 24,
                       offset: const Offset(0, 8),
                     ),
@@ -119,15 +135,19 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     AnimatedSize(
                       duration: const Duration(milliseconds: 300),
                       curve: Curves.easeInOut,
-                      child: _tabController.index == 0
-                          ? _buildLoginForm()
-                          : _buildSignUpForm(),
+                      child: Form(
+                        key: _formKey,
+                        child: _tabController.index == 0
+                            ? _buildLoginForm()
+                            : _buildSignUpForm(),
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -145,6 +165,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 8),
           TextFormField(
+            validator: _validateInput,
             decoration: InputDecoration(
               hintText: 'Enter your email or phone',
               filled: true,
@@ -169,6 +190,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           const SizedBox(height: 8),
           TextFormField(
             obscureText: _obscurePassword,
+            validator: _validateInput,
             decoration: InputDecoration(
               hintText: 'Enter your password',
               filled: true,
@@ -186,7 +208,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: AppColors.textPrimary.withOpacity(0.6),
+                  color: AppColors.textPrimary.withValues(alpha: 0.6),
                 ),
                 onPressed: () {
                   setState(() {
@@ -212,7 +234,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              if (_formKey.currentState?.validate() ?? false) {
+                Navigator.pushReplacementNamed(context, AppRouter.home);
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
@@ -310,7 +336,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                  color: AppColors.textPrimary.withOpacity(0.6),
+                  color: AppColors.textPrimary.withValues(alpha: 0.6),
                 ),
                 onPressed: () {
                   setState(() {
@@ -322,7 +348,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              if (_formKey.currentState?.validate() ?? false) {
+                Navigator.pushReplacementNamed(context, AppRouter.home);
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,

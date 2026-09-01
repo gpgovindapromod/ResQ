@@ -3,12 +3,18 @@ import '../../features/splash/splash_screen.dart';
 import '../../features/auth/auth_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/profile/profile_screen.dart';
+import '../../features/shelters/shelter_screen.dart';
+import '../../features/map/map_screen.dart';
+import '../../features/report/report_screen.dart';
 
 class AppRouter {
   static const String splash = '/';
   static const String auth = '/auth';
   static const String home = '/home';
   static const String profile = '/profile';
+  static const String shelters = '/shelters';
+  static const String map = '/map';
+  static const String report = '/report';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -20,6 +26,12 @@ class AppRouter {
         return _buildPageRoute(const HomeScreen(), settings);
       case profile:
         return _buildPageRoute(const ProfileScreen(), settings);
+      case shelters:
+        return _buildPageRoute(const ShelterScreen(), settings);
+      case map:
+        return _buildPageRoute(const MapScreen(), settings);
+      case report:
+        return _buildPageRoute(const ReportScreen(), settings);
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

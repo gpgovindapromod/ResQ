@@ -16,7 +16,7 @@ class UniversalNavBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -29,15 +29,32 @@ class UniversalNavBar extends StatelessWidget {
           backgroundColor: Colors.transparent,
           currentIndex: currentIndex,
           type: BottomNavigationBarType.fixed,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          selectedItemColor: AppColors.secondary,
+          showSelectedLabels: true,
+          showUnselectedLabels: true,
+          selectedItemColor: AppColors.primary,
           unselectedItemColor: AppColors.textSecondary,
+          selectedFontSize: 12,
+          unselectedFontSize: 12,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home_rounded),
               label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.map_outlined),
+              activeIcon: Icon(Icons.map_rounded),
+              label: 'Map',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.location_on_outlined),
+              activeIcon: Icon(Icons.location_on),
+              label: 'Shelters',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.cell_tower),
+              activeIcon: Icon(Icons.cell_tower),
+              label: 'Report',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
@@ -50,6 +67,12 @@ class UniversalNavBar extends StatelessWidget {
             if (index == 0) {
               Navigator.pushReplacementNamed(context, AppRouter.home);
             } else if (index == 1) {
+              Navigator.pushReplacementNamed(context, AppRouter.map);
+            } else if (index == 2) {
+              Navigator.pushReplacementNamed(context, AppRouter.shelters);
+            } else if (index == 3) {
+              Navigator.pushReplacementNamed(context, AppRouter.report);
+            } else if (index == 4) {
               Navigator.pushReplacementNamed(context, AppRouter.profile);
             }
           },
