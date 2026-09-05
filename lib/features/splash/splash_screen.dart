@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../../core/routes/app_router.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,25 +15,35 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Simulate loading of core systems, then navigate to Auth
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, AppRouter.auth);
+    Timer(const Duration(seconds: 3), () async {
+      bool loggedIn = await AuthService.isLoggedIn();
+      if (mounted) {
+        if (loggedIn) {
+          Navigator.pushReplacementNamed(context, AppRouter.home);
+        } else {
+          Navigator.pushReplacementNamed(context, AppRouter.auth);
+        }
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = AppColors.getPrimary(context);
+    final primaryTextColor = AppColors.getTextPrimary(context);
+    final cardBgColor = AppColors.getCardBackground(context);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo container
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardBgColor,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -42,41 +53,38 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ],
               ),
-              child: const Icon(
-                Icons.health_and_safety, // Shield with heart/cross approximation
+              child: Icon(
+                Icons.health_and_safety,
                 size: 64,
-                color: AppColors.primary,
+                color: primaryColor,
               ),
             ),
             const SizedBox(height: 24),
-            // Title
             Text(
               'ResQ',
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+              style: theme.textTheme.displayLarge?.copyWith(
                 fontSize: 32,
+                color: primaryTextColor,
               ),
             ),
             const SizedBox(height: 12),
-            // Subtitle
             Text(
               'Predict. Respond. Recover.',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.textPrimary,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: primaryTextColor,
                 fontSize: 18,
               ),
             ),
             const SizedBox(height: 64),
-            // Loading Spinner
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
               strokeWidth: 3,
             ),
             const SizedBox(height: 24),
-            // Loading Text
             Text(
               'INITIALIZING CORE SYSTEMS',
               style: TextStyle(
-                color: AppColors.primary,
+                color: primaryColor,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
                 fontSize: 12,
@@ -85,8 +93,9 @@ class _SplashScreenState extends State<SplashScreen> {
             const SizedBox(height: 8),
             Text(
               'Loading predictive models...',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 12,
+                color: AppColors.getTextSecondary(context),
               ),
             ),
           ],
@@ -95,3 +104,4 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+

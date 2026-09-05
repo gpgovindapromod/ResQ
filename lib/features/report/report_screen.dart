@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import '../../core/routes/app_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/universal_header.dart';
 import '../../shared/widgets/universal_nav_bar.dart';
+import 'dart:io';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:image_picker/image_picker.dart';
+import 'widgets/incident_type_selector.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -20,6 +23,30 @@ class _ReportScreenState extends State<ReportScreen> {
   LatLng? _currentPosition;
   String _locationName = 'Locating...';
   bool _isLoadingLocation = true;
+  bool _isSubmitting = false;
+  
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      debugPrint("Error picking image: $e");
+    }
+  }
 
   @override
   void initState() {
@@ -53,19 +80,11 @@ class _ReportScreenState extends State<ReportScreen> {
 
     try {
       Position position = await Geolocator.getCurrentPosition();
-      final geocoding = Geocoding();
-      List<Placemark> placemarks = await geocoding.placemarkFromCoordinates(position.latitude, position.longitude);
       
       if (mounted) {
         setState(() {
           _currentPosition = LatLng(position.latitude, position.longitude);
-          if (placemarks.isNotEmpty) {
-            Placemark place = placemarks.first;
-            _locationName = '${place.street ?? ''}, ${place.locality ?? place.subAdministrativeArea ?? 'Unknown'}'.trim();
-            if (_locationName.startsWith(',')) _locationName = _locationName.substring(1).trim();
-          } else {
-            _locationName = 'Unknown Location';
-          }
+          _locationName = 'Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}';
           _isLoadingLocation = false;
         });
       }
@@ -79,100 +98,161 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
+  Future<void> _submitReport() async {
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    setState(() {
+      _isSubmitting = false;
+    });
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.getSurface(context),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.check_circle_rounded, color: AppColors.getSuccess(context), size: 28),
+            const SizedBox(width: 8),
+            Text(
+              'Report Dispatched',
+              style: TextStyle(color: AppColors.getTextPrimary(context)),
+            ),
+          ],
+        ),
+        content: Text(
+          'Emergency report for "$_selectedIncidentType" has been logged successfully.\n\nCoordinates: $_locationName\n\nNearby emergency units have been notified.',
+          style: TextStyle(fontSize: 14, height: 1.4, color: AppColors.getTextPrimary(context)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                _descriptionController.clear();
+                _imageFile = null;
+              });
+            },
+            child: Text('Close', style: TextStyle(color: AppColors.getTextSecondary(context))),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushReplacementNamed(context, AppRouter.map);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.getPrimary(context),
+              foregroundColor: AppColors.getOnPrimary(context),
+            ),
+            child: const Text('View Live Map'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBgColor = AppColors.getCardBackground(context);
+    final primaryTextColor = AppColors.getTextPrimary(context);
+    final secondaryTextColor = AppColors.getTextSecondary(context);
+    final borderColor = AppColors.getBorder(context);
+    final primaryColor = AppColors.getPrimary(context);
+    final errorColor = AppColors.getError(context);
+    final onErrorColor = AppColors.getOnError(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FAFC), // background from stitch
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: const UniversalHeader(
         showBackButton: false,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
-              const Text(
-                'Report an Incident',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600, color: Color(0xFF181C1E)),
-              ),
               const SizedBox(height: 8),
-              const Text(
-                'Please provide details to help responders assess the situation quickly.',
-                style: TextStyle(fontSize: 16, color: Color(0xFF43474E), height: 1.5),
+              Text(
+                'Report an Incident',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: primaryTextColor),
               ),
-              const SizedBox(height: 24),
-              
-              // Incident Type
+              const SizedBox(height: 6),
+              Text(
+                'Please provide details to help responders assess the situation quickly.',
+                style: TextStyle(fontSize: 14, color: secondaryTextColor, height: 1.4),
+              ),
+              const SizedBox(height: 16),
               _buildCardContainer(
+                cardBgColor: cardBgColor,
+                borderColor: borderColor,
+                isDark: isDark,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Incident Type', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF181C1E))),
-                    const SizedBox(height: 16),
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(child: _buildTypeChip('Flood', Icons.water_drop)),
-                            const SizedBox(width: 16),
-                            Expanded(child: _buildTypeChip('Blocked Road', Icons.block)),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(child: _buildTypeChip('Person Needs\nRescue', Icons.medical_services)),
-                            const SizedBox(width: 16),
-                            Expanded(child: _buildTypeChip('Fire', Icons.fire_extinguisher)),
-                          ],
-                        ),
-                      ],
+                    Text('Incident Type', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
+                    const SizedBox(height: 12),
+                    IncidentTypeSelector(
+                      initialValue: _selectedIncidentType,
+                      isDark: isDark,
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedIncidentType = val;
+                        });
+                      },
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              
-              // Location Preview
+              const SizedBox(height: 16),
               _buildCardContainer(
+                cardBgColor: cardBgColor,
+                borderColor: borderColor,
+                isDark: isDark,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Current Location', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF181C1E))),
+                        Text('Current Location', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
                         GestureDetector(
                           onTap: () {
                             setState(() { _isLoadingLocation = true; });
                             _determinePosition();
                           },
-                          child: const Row(
+                          child: Row(
                             children: [
-                              Icon(Icons.my_location, size: 16, color: Color(0xFF002045)),
-                              SizedBox(width: 4),
-                              Text('Update', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF002045))),
+                              Icon(Icons.my_location, size: 16, color: primaryColor),
+                              const SizedBox(width: 4),
+                              Text('Update', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryColor)),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Container(
-                      height: 192,
+                      height: 160,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        color: const Color(0xFFE0E3E5),
-                        border: Border.all(color: const Color(0xFFC4C6CF)),
+                        color: AppColors.getSurface(context),
+                        border: Border.all(color: borderColor),
                       ),
-                      clipBehavior: Clip.antiAlias, // ensure map stays inside rounded corners
+                      clipBehavior: Clip.antiAlias,
                       child: _isLoadingLocation 
-                        ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                        ? Center(child: CircularProgressIndicator(color: primaryColor))
                         : _currentPosition == null
-                          ? const Center(child: Text('Could not load map.', style: TextStyle(color: AppColors.textSecondary)))
+                          ? Center(child: Text('Could not load map.', style: TextStyle(color: secondaryTextColor)))
                           : FlutterMap(
                               options: MapOptions(
                                 initialCenter: _currentPosition!,
@@ -180,9 +260,14 @@ class _ReportScreenState extends State<ReportScreen> {
                                 interactionOptions: const InteractionOptions(flags: InteractiveFlag.all),
                               ),
                               children: [
-                                TileLayer(
-                                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png?v=1',
-                                  userAgentPackageName: 'com.btech.srp.resq',
+                                OverlayImageLayer(
+                                  overlayImages: [
+                                    OverlayImage(
+                                      bounds: LatLngBounds(const LatLng(8.8500, 76.5800), const LatLng(8.9300, 76.6500)),
+                                      imageProvider: const AssetImage('assets/images/kollam_map.jpg'),
+                                      opacity: 0.8,
+                                    ),
+                                  ],
                                 ),
                                 MarkerLayer(
                                   markers: [
@@ -190,22 +275,22 @@ class _ReportScreenState extends State<ReportScreen> {
                                       point: _currentPosition!,
                                       width: 40,
                                       height: 40,
-                                      child: const Icon(Icons.location_on, color: Color(0xFFB51822), size: 40),
+                                      child: Icon(Icons.location_on, color: errorColor, size: 40),
                                     ),
                                   ],
                                 ),
                               ],
                             ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Icon(Icons.pin_drop_outlined, size: 18, color: Color(0xFF43474E)),
+                        Icon(Icons.pin_drop_outlined, size: 18, color: secondaryTextColor),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             _locationName,
-                            style: const TextStyle(fontSize: 16, color: Color(0xFF43474E)),
+                            style: TextStyle(fontSize: 14, color: secondaryTextColor),
                           ),
                         ),
                       ],
@@ -213,107 +298,146 @@ class _ReportScreenState extends State<ReportScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Attachment
+              const SizedBox(height: 16),
               _buildCardContainer(
+                cardBgColor: cardBgColor,
+                borderColor: borderColor,
+                isDark: isDark,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Attach Photo (Optional)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF181C1E))),
-                    const SizedBox(height: 16),
+                    Text('Attach Photo (Optional)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
+                    const SizedBox(height: 12),
                     Container(
-                      height: 128,
+                      height: 112,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: cardBgColor,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFFC4C6CF), style: BorderStyle.none),
                       ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {},
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                             decoration: BoxDecoration(
-                               borderRadius: BorderRadius.circular(8),
-                               border: Border.all(color: const Color(0xFFC4C6CF), width: 2, strokeAlign: BorderSide.strokeAlignOutside),
-                             ),
-                             child: const Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.add_a_photo_outlined, size: 32, color: Color(0xFF43474E)),
-                                  SizedBox(height: 8),
-                                  Text('Tap to upload or take a photo', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF43474E))),
-                                ],
-                             ),
-                          ),
-                        ),
-                      ),
+                      child: _imageFile != null
+                          ? Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(_imageFile!, fit: BoxFit.cover, width: double.infinity, height: 112),
+                                ),
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _imageFile = null),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.close, color: Colors.white, size: 20),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: _pickImage,
+                                borderRadius: BorderRadius.circular(8),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: borderColor, width: 2),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.add_a_photo_outlined, size: 28, color: secondaryTextColor),
+                                      const SizedBox(height: 8),
+                                      Text('Tap to upload a photo', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: secondaryTextColor)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Description
+              const SizedBox(height: 16),
               _buildCardContainer(
+                cardBgColor: cardBgColor,
+                borderColor: borderColor,
+                isDark: isDark,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Description', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF181C1E))),
-                    const SizedBox(height: 16),
+                    Text('Description', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
+                    const SizedBox(height: 12),
                     TextField(
+                      controller: _descriptionController,
                       maxLines: 3,
+                      style: TextStyle(color: primaryTextColor),
                       decoration: InputDecoration(
-                        hintText: 'Provide additional details about the incident...',
-                        hintStyle: const TextStyle(color: Color(0xFF43474E), fontSize: 16),
+                        hintText: 'Provide additional details...',
+                        hintStyle: TextStyle(color: secondaryTextColor, fontSize: 14),
                         filled: true,
-                        fillColor: const Color(0xFFF7FAFC),
+                        fillColor: AppColors.getSurface(context),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFC4C6CF)),
+                          borderSide: BorderSide(color: borderColor),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFFC4C6CF)),
+                          borderSide: BorderSide(color: borderColor),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: const BorderSide(color: Color(0xFF002045)),
+                          borderSide: BorderSide(color: primaryColor),
                         ),
-                        contentPadding: const EdgeInsets.all(16),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Submit Button
               Container(
-                margin: const EdgeInsets.only(bottom: 32),
-                height: 56,
+                margin: const EdgeInsets.only(bottom: 24),
+                height: 50,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: _isSubmitting ? null : _submitReport,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFBA1A1A), // bg-error
-                    foregroundColor: Colors.white,
+                    backgroundColor: errorColor,
+                    foregroundColor: onErrorColor,
+                    disabledBackgroundColor: errorColor.withValues(alpha: 0.6),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9999)),
                     elevation: 2,
                   ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.warning_amber_rounded, size: 24),
-                      SizedBox(width: 8),
-                      Text('Submit Emergency Report', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
+                  child: _isSubmitting
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(color: onErrorColor, strokeWidth: 2.5),
+                            ),
+                            const SizedBox(width: 12),
+                            Text('Sending Alert...', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: onErrorColor)),
+                          ],
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.warning_amber_rounded, size: 20),
+                            SizedBox(width: 8),
+                            Text('Submit Emergency Report', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
                 ),
               ),
-              const SizedBox(height: 88), // padding for bottom nav
+              const SizedBox(height: 80),
             ],
           ),
         ),
@@ -322,60 +446,22 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  Widget _buildCardContainer({required Widget child}) {
+  Widget _buildCardContainer({required Widget child, required Color cardBgColor, required Color borderColor, required bool isDark}) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBgColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E3E5)),
+        border: Border.all(color: borderColor),
         boxShadow: [
-           BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 1))
+           BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), blurRadius: 4, offset: const Offset(0, 1))
         ]
       ),
       child: child,
     );
   }
 
-  Widget _buildTypeChip(String label, IconData icon) {
-    final isSelected = _selectedIncidentType == label;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedIncidentType = label;
-        });
-      },
-      child: Container(
-        constraints: const BoxConstraints(minHeight: 96),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFD6E3FF) : const Color(0xFFF7FAFC),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-             color: isSelected ? const Color(0xFF002045) : const Color(0xFFC4C6CF), 
-             width: isSelected ? 2.0 : 1.0
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 32, color: isSelected ? const Color(0xFF2D476F) : const Color(0xFF43474E)),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? const Color(0xFF2D476F) : const Color(0xFF43474E),
-                height: 1.2,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
+
+

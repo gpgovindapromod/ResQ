@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/routes/app_router.dart';
+import '../../core/localization/app_localizations.dart';
 import '../../shared/widgets/universal_nav_bar.dart';
 import '../../shared/widgets/universal_header.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'widgets/greeting_widget.dart';
+import 'widgets/action_grid_widget.dart';
 
 // --- Data Models ---
 class FloodRisk {
@@ -34,14 +37,14 @@ class Shelter {
   final String distance;
   final String capacity;
   final IconData icon;
-  final Color capacityColor;
+  final bool isHighCapacity;
 
   const Shelter({
     required this.name,
     required this.distance,
     required this.capacity,
     required this.icon,
-    this.capacityColor = AppColors.textPrimary,
+    this.isHighCapacity = false,
   });
 }
 
@@ -153,86 +156,100 @@ class _HomeScreenState extends State<HomeScreen> {
       distance: '1.2 km',
       capacity: '45% Capacity',
       icon: Icons.home_outlined,
-      capacityColor: Color(0xFF1E293B),
+      isHighCapacity: false,
     ),
     Shelter(
       name: 'Govt. Higher Sec. School',
       distance: '2.5 km',
       capacity: '90% Capacity',
       icon: Icons.school_outlined,
-      capacityColor: Color(0xFFDC2626),
+      isHighCapacity: true,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final primaryTextColor = AppColors.getTextPrimary(context);
+    final secondaryTextColor = AppColors.getTextSecondary(context);
+    final cardBgColor = AppColors.getCardBackground(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: UniversalHeader(
         titleWidget: Row(
           children: [
-            const Icon(Icons.location_on, color: AppColors.primary, size: 28),
+            Icon(Icons.location_on, color: AppColors.getPrimary(context), size: 26),
             const SizedBox(width: 8),
             Expanded(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Current Location',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
-                    ),
-                    Text(
-                      _locationName,
-                      style: const TextStyle(color: AppColors.primary, fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    loc.translate('current_location'),
+                    style: TextStyle(color: secondaryTextColor, fontSize: 11, fontWeight: FontWeight.w500),
+                  ),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          _locationName,
+                          style: TextStyle(color: primaryTextColor, fontSize: 15, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (_isLoadingLocation) ...[
+                        const SizedBox(width: 6),
+                        SizedBox(
+                          width: 10,
+                          height: 10,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: secondaryTextColor,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
         ),
         showBackButton: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_outlined, color: AppColors.primary, size: 28),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: RefreshIndicator(
-                color: AppColors.primary,
+                color: AppColors.getPrimary(context),
                 onRefresh: () async {
                   await _determinePosition();
                   await Future.delayed(const Duration(seconds: 1));
                 },
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildGreeting(),
-                      const SizedBox(height: 24),
+                      GreetingWidget(primaryColor: primaryTextColor, secondaryColor: secondaryTextColor, loc: loc),
+                      const SizedBox(height: 20),
                       FloodRiskCard(risk: currentRisk),
-                      const SizedBox(height: 24),
-                      _buildActionGrid(),
-                      const SizedBox(height: 32),
-                      _buildSectionHeader('Latest Alerts', 'View All'),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
+                      ActionGridWidget(cardBgColor: cardBgColor, primaryTextColor: primaryTextColor, loc: loc),
+                      const SizedBox(height: 28),
+                      _buildSectionHeader(loc.translate('latest_alerts'), loc.translate('view_all'), primaryTextColor),
+                      const SizedBox(height: 14),
                       ...alerts.map((alert) => AlertCard(alert: alert)),
-                      const SizedBox(height: 32),
-                      _buildSectionHeader('Nearby Shelters', ''),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 28),
+                      _buildSectionHeader(loc.translate('nearby_shelters'), '', primaryTextColor),
+                      const SizedBox(height: 14),
                       ...shelters.map((shelter) => ShelterCard(shelter: shelter)),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -245,106 +262,26 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildGreeting() {
-    final hour = DateTime.now().hour;
-    String greeting;
-    if (hour < 12) {
-      greeting = 'Good morning.';
-    } else if (hour < 17) {
-      greeting = 'Good afternoon.';
-    } else {
-      greeting = 'Good evening.';
-    }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          greeting,
-          style: const TextStyle(color: AppColors.primary, fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Here is the latest status for your area.',
-          style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildActionGrid() {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            children: [
-              ActionGridItem(
-                title: 'View Risk Map',
-                icon: Icons.map_outlined,
-                backgroundColor: AppColors.primary,
-                textColor: Colors.white,
-                iconColor: Colors.white,
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, AppRouter.map);
-                },
-              ),
-              const SizedBox(height: 16),
-              ActionGridItem(
-                title: 'Report Incident',
-                icon: Icons.cell_tower, // Using cell_tower as an approximation
-                backgroundColor: const Color(0xFFB91C1C),
-                textColor: Colors.white,
-                iconColor: Colors.white,
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, AppRouter.report);
-                },
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            children: [
-              ActionGridItem(
-                title: 'Find Shelter',
-                icon: Icons.location_on_outlined,
-                backgroundColor: Colors.white,
-                textColor: AppColors.primary,
-                iconColor: AppColors.primary,
-                hasBorder: true,
-                onTap: () {},
-              ),
-              const SizedBox(height: 16),
-              ActionGridItem(
-                title: 'Emergency Contacts',
-                icon: Icons.contact_phone_outlined,
-                backgroundColor: Colors.white,
-                textColor: AppColors.primary,
-                iconColor: AppColors.primary,
-                hasBorder: true,
-                onTap: () {},
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSectionHeader(String title, String actionText) {
+  Widget _buildSectionHeader(String title, String actionText, Color primaryTextColor) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
+        Expanded(
+          child: Text(
+            title,
+            style: TextStyle(color: primaryTextColor, fontSize: 18, fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         if (actionText.isNotEmpty)
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, AppRouter.map);
+            },
             style: TextButton.styleFrom(
-              foregroundColor: AppColors.primary,
+              foregroundColor: AppColors.getPrimary(context),
               padding: EdgeInsets.zero,
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -365,122 +302,27 @@ class FloodRiskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 4,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF59E0B),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'CURRENT FLOOD RISK',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      risk.status,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 24, fontWeight: FontWeight.w900),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEF3C7),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF59E0B),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            risk.tag,
-                            style: const TextStyle(color: Color(0xFFB45309), fontSize: 11, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  risk.description,
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.5),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBgColor = AppColors.getCardBackground(context);
+    final borderColor = AppColors.getBorder(context);
+    final primaryTextColor = AppColors.getTextPrimary(context);
+    final secondaryTextColor = AppColors.getTextSecondary(context);
+    final warningColor = AppColors.getWarning(context);
+    final warningBg = AppColors.getWarningBg(context);
+    final loc = AppLocalizations.of(context);
 
-class ActionGridItem extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color backgroundColor;
-  final Color textColor;
-  final Color iconColor;
-  final bool hasBorder;
-  final VoidCallback onTap;
-
-  const ActionGridItem({
-    super.key,
-    required this.title,
-    required this.icon,
-    required this.backgroundColor,
-    required this.textColor,
-    required this.iconColor,
-    this.hasBorder = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: '${loc.translate('flood_risk')}: ${risk.status}, ${risk.tag}. ${risk.description}',
       child: Container(
-        height: 130, // Increased to prevent overflow when text wraps
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: cardBgColor,
           borderRadius: BorderRadius.circular(12),
-          border: hasBorder ? Border.all(color: AppColors.border) : null,
+          border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
+              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             )
@@ -488,15 +330,65 @@ class ActionGridItem extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: iconColor, size: 28),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+            Container(
+              height: 4,
+              decoration: BoxDecoration(
+                color: warningColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    loc.translate('flood_risk'),
+                    style: TextStyle(color: secondaryTextColor, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        risk.status,
+                        style: TextStyle(color: primaryTextColor, fontSize: 24, fontWeight: FontWeight.w900),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: warningBg,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: warningColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              risk.tag,
+                              style: TextStyle(color: warningColor, fontSize: 11, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    risk.description,
+                    style: TextStyle(color: secondaryTextColor, fontSize: 14, height: 1.5),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -504,6 +396,8 @@ class ActionGridItem extends StatelessWidget {
     );
   }
 }
+
+
 
 class AlertCard extends StatelessWidget {
   final AlertItem alert;
@@ -512,14 +406,20 @@ class AlertCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBgColor = AppColors.getCardBackground(context);
+    final borderColor = AppColors.getBorder(context);
+    final primaryTextColor = AppColors.getTextPrimary(context);
+    final errorColor = AppColors.getError(context);
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBgColor,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 5,
             offset: const Offset(0, 2),
           )
@@ -530,9 +430,9 @@ class AlertCard extends StatelessWidget {
           children: [
             Container(
               width: 4,
-              decoration: const BoxDecoration(
-                color: Color(0xFFDC2626),
-                borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
+              decoration: BoxDecoration(
+                color: errorColor,
+                borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
               ),
             ),
             Expanded(
@@ -542,13 +442,13 @@ class AlertCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      alert.type,
-                      style: const TextStyle(color: Color(0xFFDC2626), fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                      'ROAD CLOSURE',
+                      style: TextStyle(color: errorColor, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       alert.description,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                      style: TextStyle(color: primaryTextColor, fontSize: 14),
                     ),
                   ],
                 ),
@@ -568,66 +468,87 @@ class ShelterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBgColor = AppColors.getCardBackground(context);
+    final borderColor = AppColors.getBorder(context);
+    final primaryTextColor = AppColors.getTextPrimary(context);
+    final secondaryTextColor = AppColors.getTextSecondary(context);
+    final iconBgColor = AppColors.getPrimary(context);
+    final capacityColor = shelter.isHighCapacity ? AppColors.getError(context) : AppColors.getTextPrimary(context);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
             blurRadius: 5,
             offset: const Offset(0, 2),
           )
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(shelter.icon, color: Colors.white, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.pushReplacementNamed(context, AppRouter.shelters);
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
               children: [
-                Text(
-                  shelter.name,
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.bold),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: iconBgColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(shelter.icon, color: AppColors.getOnPrimary(context), size: 24),
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.directions_walk, size: 14, color: AppColors.textSecondary),
-                    const SizedBox(width: 4),
-                    Text(
-                      shelter.distance,
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('•', style: TextStyle(color: AppColors.border, fontSize: 12)),
-                    const SizedBox(width: 8),
-                    const Icon(Icons.people_outline, size: 14, color: AppColors.textSecondary),
-                    const SizedBox(width: 4),
-                    Text(
-                      shelter.capacity,
-                      style: TextStyle(color: shelter.capacityColor, fontSize: 12, fontWeight: FontWeight.w600),
-                    ),
-                  ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        shelter.name,
+                        style: TextStyle(color: primaryTextColor, fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.directions_walk, size: 14, color: secondaryTextColor),
+                          const SizedBox(width: 4),
+                          Text(
+                            shelter.distance,
+                            style: TextStyle(color: secondaryTextColor, fontSize: 12),
+                          ),
+                          const SizedBox(width: 8),
+                          Text('•', style: TextStyle(color: borderColor, fontSize: 12)),
+                          const SizedBox(width: 8),
+                          Icon(Icons.people_outline, size: 14, color: secondaryTextColor),
+                          const SizedBox(width: 4),
+                          Text(
+                            shelter.capacity,
+                            style: TextStyle(color: capacityColor, fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
+                Icon(Icons.chevron_right, color: secondaryTextColor),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-        ],
+        ),
       ),
     );
   }
 }
+
+

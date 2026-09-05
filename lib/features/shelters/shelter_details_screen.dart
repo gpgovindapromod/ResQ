@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'widgets/shelter_card.dart';
 import '../../shared/widgets/universal_header.dart';
 import '../../shared/widgets/universal_nav_bar.dart';
+import '../../core/routes/app_router.dart';
+import '../../core/theme/app_colors.dart';
 
 class ShelterDetailsScreen extends StatelessWidget {
   final ShelterModel shelter;
@@ -12,18 +12,37 @@ class ShelterDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBgColor = AppColors.getCardBackground(context);
+    final primaryTextColor = AppColors.getTextPrimary(context);
+    final secondaryTextColor = AppColors.getTextSecondary(context);
+    final borderColor = AppColors.getBorder(context);
+    final primaryColor = AppColors.getPrimary(context);
+    final onPrimaryColor = AppColors.getOnPrimary(context);
+    final errorColor = AppColors.getError(context);
+    final errorBg = AppColors.getErrorBg(context);
+    final warningColor = AppColors.getWarning(context);
+    final warningBg = AppColors.getWarningBg(context);
     final double capacityPercent = shelter.currentCapacity / shelter.maxCapacity;
     final int capacityPercentInt = (capacityPercent * 100).round();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FAFC), // background
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: UniversalHeader(
         title: 'Shelter Details',
         showBackButton: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.share, color: Color(0xFF002045)),
-            onPressed: () {},
+            icon: Icon(Icons.share, color: primaryColor),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Shelter details for "${shelter.name}" copied to clipboard!'),
+                  backgroundColor: AppColors.getSurface(context),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -33,48 +52,44 @@ class ShelterDetailsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Shelter Image Placeholder
               Container(
                 height: 200,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE0E3E5),
                   borderRadius: BorderRadius.circular(12),
                   image: const DecorationImage(
-                    image: NetworkImage('https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?auto=format&fit=crop&w=800&q=80'),
+                    image: AssetImage('assets/images/shelter.jpg'),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              
-              // Title and Location
               Text(
                 shelter.name,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF002045), letterSpacing: -0.01),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: primaryTextColor, letterSpacing: -0.01),
               ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.location_on_outlined, size: 16, color: Color(0xFF43474E)),
+                  Icon(Icons.location_on_outlined, size: 16, color: secondaryTextColor),
                   const SizedBox(width: 4),
                   Text(
-                    '124 Main Street, Metro City', // Hardcoded as per design or use shelter.distance
-                    style: const TextStyle(fontSize: 14, color: Color(0xFF43474E)),
+                    '124 Main Street, Metro City',
+                    style: TextStyle(fontSize: 14, color: secondaryTextColor),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-
-              // Get Directions Button (Dark Blue)
               SizedBox(
                 height: 48,
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRouter.map);
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF002045), // primary
-                    foregroundColor: Colors.white,
+                    backgroundColor: primaryColor,
+                    foregroundColor: onPrimaryColor,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9999)),
                     elevation: 0,
                   ),
@@ -89,9 +104,10 @@ class ShelterDetailsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Occupancy Status Card
               _buildCardContainer(
+                cardBgColor: cardBgColor,
+                borderColor: borderColor,
+                isDark: isDark,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -99,17 +115,17 @@ class ShelterDetailsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Occupancy\nStatus', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFF002045), height: 1.2)),
+                        Text('Occupancy\nStatus', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: primaryTextColor, height: 1.2)),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFDEAA), // tertiary-fixed
+                            color: warningBg,
                             borderRadius: BorderRadius.circular(9999),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Filling\nFast',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF5F4100), height: 1.2), // on-tertiary-fixed-variant
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: warningColor, height: 1.2),
                           ),
                         ),
                       ],
@@ -119,8 +135,8 @@ class ShelterDetailsScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('$capacityPercentInt%', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: Color(0xFF002045))),
-                        Text('${shelter.currentCapacity} / ${shelter.maxCapacity} beds', style: const TextStyle(fontSize: 14, color: Color(0xFF43474E))),
+                        Text('$capacityPercentInt%', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: primaryTextColor)),
+                        Text('${shelter.currentCapacity} / ${shelter.maxCapacity} beds', style: TextStyle(fontSize: 14, color: secondaryTextColor)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -128,8 +144,8 @@ class ShelterDetailsScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(9999),
                       child: LinearProgressIndicator(
                         value: capacityPercent,
-                        backgroundColor: const Color(0xFFE0E3E5), // surface-variant
-                        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFBA1A1A)), // error color (red) as in design
+                        backgroundColor: borderColor,
+                        valueColor: AlwaysStoppedAnimation<Color>(errorColor),
                         minHeight: 8,
                       ),
                     ),
@@ -137,15 +153,15 @@ class ShelterDetailsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Available Facilities Card
               _buildCardContainer(
+                cardBgColor: cardBgColor,
+                borderColor: borderColor,
+                isDark: isDark,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Available Facilities', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF002045))),
+                    Text('Available Facilities', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: primaryTextColor)),
                     const SizedBox(height: 16),
-                    // Grid matching the Incident Type style from code.html
                     GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
@@ -153,9 +169,9 @@ class ShelterDetailsScreen extends StatelessWidget {
                         crossAxisCount: 2,
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
-                        childAspectRatio: 1.5, // Wider than tall
+                        childAspectRatio: 1.5,
                       ),
-                      itemCount: 6, // Hardcoded to match design (Food, Water, Medical, Restrooms, Power, Wi-Fi)
+                      itemCount: 6,
                       itemBuilder: (context, index) {
                         final items = [
                           {'icon': Icons.restaurant, 'label': 'Food'},
@@ -165,40 +181,41 @@ class ShelterDetailsScreen extends StatelessWidget {
                           {'icon': Icons.power, 'label': 'Power'},
                           {'icon': Icons.wifi, 'label': 'Wi-Fi'},
                         ];
-                        return _buildFacilityBox(items[index]['label'] as String, items[index]['icon'] as IconData);
+                        return _buildFacilityBox(context, items[index]['label'] as String, items[index]['icon'] as IconData);
                       },
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Contact Information Card
               _buildCardContainer(
+                cardBgColor: cardBgColor,
+                borderColor: borderColor,
+                isDark: isDark,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Contact Information', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF002045))),
+                    Text('Contact Information', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: primaryTextColor)),
                     const SizedBox(height: 16),
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.phone_outlined, size: 20, color: Color(0xFF43474E)),
-                        SizedBox(width: 12),
-                        Text('1-800-SAFE-911', style: TextStyle(fontSize: 14, color: Color(0xFF181C1E), fontWeight: FontWeight.w500)),
+                        Icon(Icons.phone_outlined, size: 20, color: secondaryTextColor),
+                        const SizedBox(width: 12),
+                        Text('1-800-SAFE-911', style: TextStyle(fontSize: 14, color: primaryTextColor, fontWeight: FontWeight.w500)),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.access_time, size: 20, color: Color(0xFF43474E)),
+                        Icon(Icons.access_time, size: 20, color: secondaryTextColor),
                         const SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text('Intake: 24/7', style: TextStyle(fontSize: 14, color: Color(0xFF181C1E), fontWeight: FontWeight.w500)),
-                            SizedBox(height: 4),
-                            Text('Doors lock at 10 PM', style: TextStyle(fontSize: 12, color: Color(0xFF43474E))),
+                          children: [
+                            Text('Intake: 24/7', style: TextStyle(fontSize: 14, color: primaryTextColor, fontWeight: FontWeight.w500)),
+                            const SizedBox(height: 4),
+                            Text('Doors lock at 10 PM', style: TextStyle(fontSize: 12, color: secondaryTextColor)),
                           ],
                         ),
                       ],
@@ -207,42 +224,38 @@ class ShelterDetailsScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Critical Alert
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFDAD6), // error-container
+                  color: errorBg,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded, color: Color(0xFF93000A), size: 20),
-                        SizedBox(width: 8),
-                        Text('Critical Alert', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF93000A))),
+                        Icon(Icons.warning_amber_rounded, color: errorColor, size: 20),
+                        const SizedBox(width: 8),
+                        Text('Critical Alert', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: errorColor)),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Please enter through the North Entrance only. South access is currently blocked due to debris. Have your ID ready for quick processing.',
-                      style: TextStyle(fontSize: 14, color: Color(0xFF93000A), height: 1.4),
+                      style: TextStyle(fontSize: 14, color: errorColor, height: 1.4),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Map & Navigate Card
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBgColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE0E3E5)),
+                  border: Border.all(color: borderColor),
                   boxShadow: [
-                     BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 1))
+                     BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), blurRadius: 4, offset: const Offset(0, 1))
                   ]
                 ),
                 child: Column(
@@ -251,29 +264,16 @@ class ShelterDetailsScreen extends StatelessWidget {
                       height: 120,
                       child: ClipRRect(
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                        child: AbsorbPointer( // Prevents panning/zooming gestures from catching scroll
-                          child: FlutterMap(
-                            options: const MapOptions(
-                              initialCenter: LatLng(8.8980, 76.6200), // Match the mock marker location from MapScreen
-                              initialZoom: 15.0,
-                              interactionOptions: InteractionOptions(flags: InteractiveFlag.none), // Disable interaction
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.getSurface(context),
+                            image: const DecorationImage(
+                              image: AssetImage('assets/images/map_bg.jpg'),
+                              fit: BoxFit.cover,
                             ),
-                            children: [
-                              TileLayer(
-                                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png?v=1',
-                                userAgentPackageName: 'com.btech.srp.resq',
-                              ),
-                              const MarkerLayer(
-                                markers: [
-                                  Marker(
-                                    point: LatLng(8.8980, 76.6200),
-                                    width: 40,
-                                    height: 40,
-                                    child: Icon(Icons.location_on, color: Color(0xFFBA1A1A), size: 40),
-                                  ),
-                                ],
-                              ),
-                            ],
+                          ),
+                          child: Center(
+                            child: Icon(Icons.map_outlined, color: secondaryTextColor, size: 32),
                           ),
                         ),
                       ),
@@ -284,10 +284,12 @@ class ShelterDetailsScreen extends StatelessWidget {
                         height: 48,
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, AppRouter.map);
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFBA1A1A), // error
-                            foregroundColor: Colors.white,
+                            backgroundColor: errorColor,
+                            foregroundColor: AppColors.getOnError(context),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9999)),
                             elevation: 0,
                           ),
@@ -305,7 +307,7 @@ class ShelterDetailsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 88), // Bottom padding for nav bar
+              const SizedBox(height: 88),
             ],
           ),
         ),
@@ -314,40 +316,42 @@ class ShelterDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCardContainer({required Widget child}) {
+  Widget _buildCardContainer({required Widget child, required Color cardBgColor, required Color borderColor, required bool isDark}) {
     return Container(
       padding: const EdgeInsets.all(20),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white, // bg-surface-container-lowest
+        color: cardBgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE0E3E5)), // border-surface-variant
+        border: Border.all(color: borderColor),
         boxShadow: [
-           BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 2))
+           BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03), blurRadius: 8, offset: const Offset(0, 2))
         ]
       ),
       child: child,
     );
   }
 
-  Widget _buildFacilityBox(String label, IconData icon) {
+  Widget _buildFacilityBox(BuildContext context, String label, IconData icon) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F4F6), // surface-container-low
+        color: AppColors.getSurface(context),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE0E3E5)), // border-surface-variant
+        border: Border.all(color: AppColors.getBorder(context)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 28, color: const Color(0xFF002045)), // primary
+          Icon(icon, size: 28, color: AppColors.getPrimary(context)),
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF002045)),
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.getTextPrimary(context)),
           ),
         ],
       ),
     );
   }
 }
+
+

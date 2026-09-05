@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/routes/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../shelter_details_screen.dart';
 
@@ -29,17 +30,26 @@ class ShelterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBgColor = AppColors.getCardBackground(context);
+    final footerBgColor = AppColors.getSurface(context);
+    final primaryTextColor = AppColors.getTextPrimary(context);
+    final secondaryTextColor = AppColors.getTextSecondary(context);
+    final borderColor = AppColors.getBorder(context);
+    final primaryColor = AppColors.getPrimary(context);
+    final onPrimaryColor = AppColors.getOnPrimary(context);
     final double capacityPercent = shelter.currentCapacity / shelter.maxCapacity;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -48,7 +58,6 @@ class ShelterCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top Accent Line
           Container(
             height: 6,
             decoration: BoxDecoration(
@@ -61,14 +70,13 @@ class ShelterCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Title and Status
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
                         shelter.name,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: primaryTextColor),
                       ),
                     ),
                     Container(
@@ -85,24 +93,22 @@ class ShelterCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                // Distance
                 Row(
                   children: [
-                    const Icon(Icons.location_on_outlined, size: 16, color: AppColors.textSecondary),
+                    Icon(Icons.location_on_outlined, size: 16, color: secondaryTextColor),
                     const SizedBox(width: 4),
                     Text(
                       '${shelter.distance} away',
-                      style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 14, color: secondaryTextColor),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
-                // Capacity
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Capacity', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                    Text('${shelter.currentCapacity} / ${shelter.maxCapacity}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                    Text('Capacity', style: TextStyle(fontSize: 13, color: secondaryTextColor)),
+                    Text('${shelter.currentCapacity} / ${shelter.maxCapacity}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: primaryTextColor)),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -110,13 +116,12 @@ class ShelterCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
                     value: capacityPercent,
-                    backgroundColor: AppColors.border,
+                    backgroundColor: borderColor,
                     valueColor: AlwaysStoppedAnimation<Color>(shelter.statusColor),
                     minHeight: 6,
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Amenities
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -124,18 +129,18 @@ class ShelterCard extends StatelessWidget {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FB),
+                        color: footerBgColor,
                         borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: AppColors.border, width: 0.5),
+                        border: Border.all(color: borderColor, width: 0.5),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(amenity['icon'] as IconData, size: 14, color: AppColors.textSecondary),
+                          Icon(amenity['icon'] as IconData, size: 14, color: secondaryTextColor),
                           const SizedBox(width: 4),
                           Text(
                             amenity['label'] as String,
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                            style: TextStyle(fontSize: 12, color: secondaryTextColor, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),
@@ -145,13 +150,12 @@ class ShelterCard extends StatelessWidget {
               ],
             ),
           ),
-          // Footer Action Row
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF8F9FB),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(12)),
-              border: Border(top: BorderSide(color: AppColors.border)),
+            decoration: BoxDecoration(
+              color: footerBgColor,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+              border: Border(top: BorderSide(color: borderColor)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -165,16 +169,18 @@ class ShelterCard extends StatelessWidget {
                       ),
                     );
                   },
-                  style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+                  style: TextButton.styleFrom(foregroundColor: primaryColor),
                   child: const Text('View Details', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
                 ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRouter.map);
+                  },
                   icon: const Icon(Icons.directions, size: 18),
                   label: const Text('Directions', style: TextStyle(fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: primaryColor,
+                    foregroundColor: onPrimaryColor,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -188,3 +194,5 @@ class ShelterCard extends StatelessWidget {
     );
   }
 }
+
+

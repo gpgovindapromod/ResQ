@@ -20,27 +20,6 @@ class _MapScreenState extends State<MapScreen> {
   bool _isLoadingLocation = true;
   bool _locationPermissionGranted = false;
 
-  final List<Marker> _mockMarkers = [
-    Marker(
-      point: const LatLng(8.8932, 76.6141), // Flood zone
-      width: 40,
-      height: 40,
-      child: const Icon(Icons.water_drop, color: Colors.blue, size: 40),
-    ),
-    Marker(
-      point: const LatLng(8.8980, 76.6200), // Shelter
-      width: 40,
-      height: 40,
-      child: const Icon(Icons.home, color: Colors.green, size: 40),
-    ),
-    Marker(
-      point: const LatLng(8.8850, 76.6050), // Blocked road
-      width: 40,
-      height: 40,
-      child: const Icon(Icons.remove_road, color: Colors.red, size: 40),
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -91,6 +70,57 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  void _showLayerOptions() {
+    final primaryColor = AppColors.getPrimary(context);
+    final infoColor = AppColors.getInfo(context);
+    final successColor = AppColors.getSuccess(context);
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.getSurface(context),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Map Layers & Overlays',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryColor),
+            ),
+            Divider(color: AppColors.getBorder(context)),
+            ListTile(
+              leading: Icon(Icons.map, color: primaryColor),
+              title: Text('Standard Topo Map', style: TextStyle(color: AppColors.getTextPrimary(context))),
+              trailing: Icon(Icons.check, color: primaryColor),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Standard map layer activated')));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.waves, color: infoColor),
+              title: Text('Live Flood Inundation Layer', style: TextStyle(color: AppColors.getTextPrimary(context))),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Flood overlay refreshed')));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.night_shelter, color: successColor),
+              title: Text('Shelter Locations & Availability', style: TextStyle(color: AppColors.getTextPrimary(context))),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Shelters layer enabled')));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _centerMap() {
     if (_locationPermissionGranted) {
       _mapController.move(_currentLocation, 14.0);
@@ -104,15 +134,46 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBgColor = AppColors.getCardBackground(context);
+    final primaryTextColor = AppColors.getTextPrimary(context);
+    final secondaryTextColor = AppColors.getTextSecondary(context);
+    final borderColor = AppColors.getBorder(context);
+    final primaryColor = AppColors.getPrimary(context);
+    final infoColor = AppColors.getInfo(context);
+    final successColor = AppColors.getSuccess(context);
+    final errorColor = AppColors.getError(context);
+
+    final mockMarkers = [
+      Marker(
+        point: const LatLng(8.8932, 76.6141),
+        width: 40,
+        height: 40,
+        child: Icon(Icons.water_drop, color: infoColor, size: 40),
+      ),
+      Marker(
+        point: const LatLng(8.8980, 76.6200),
+        width: 40,
+        height: 40,
+        child: Icon(Icons.home, color: successColor, size: 40),
+      ),
+      Marker(
+        point: const LatLng(8.8850, 76.6050),
+        width: 40,
+        height: 40,
+        child: Icon(Icons.remove_road, color: errorColor, size: 40),
+      ),
+    ];
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: const UniversalHeader(
         title: 'Map',
         showBackButton: false,
       ),
       body: Stack(
         children: [
-          // Interactive Map Background
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
@@ -120,13 +181,18 @@ class _MapScreenState extends State<MapScreen> {
               initialZoom: 13.0,
             ),
             children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png?v=1',
-                userAgentPackageName: 'com.btech.srp.resq',
+              OverlayImageLayer(
+                overlayImages: [
+                  OverlayImage(
+                    bounds: LatLngBounds(const LatLng(8.8500, 76.5800), const LatLng(8.9300, 76.6500)),
+                    imageProvider: const AssetImage('assets/images/kollam_map.jpg'),
+                    opacity: 0.8,
+                  ),
+                ],
               ),
               MarkerLayer(
                 markers: [
-                  ..._mockMarkers,
+                  ...mockMarkers,
                   if (!_isLoadingLocation && _locationPermissionGranted)
                     Marker(
                       point: _currentLocation,
@@ -134,11 +200,11 @@ class _MapScreenState extends State<MapScreen> {
                       height: 50,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.3),
+                          color: primaryColor.withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
-                        child: const Center(
-                          child: Icon(Icons.my_location, color: AppColors.primary, size: 28),
+                        child: Center(
+                          child: Icon(Icons.my_location, color: primaryColor, size: 28),
                         ),
                       ),
                     ),
@@ -146,37 +212,34 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ],
           ),
-
-          // Search Bar Overlay
           Positioned(
             top: 20,
             left: 20,
             right: 20,
             child: TextField(
+              style: TextStyle(color: primaryTextColor),
               decoration: InputDecoration(
                 hintText: 'Search for areas or coordinates...',
-                hintStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                hintStyle: TextStyle(color: secondaryTextColor, fontSize: 14),
+                prefixIcon: Icon(Icons.search, color: secondaryTextColor),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: cardBgColor,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                  borderSide: BorderSide(color: primaryColor, width: 2),
                 ),
               ),
             ),
           ),
-
-          // Map Action Buttons (Zoom & Center)
           Positioned(
             bottom: 120,
             right: 20,
@@ -185,23 +248,21 @@ class _MapScreenState extends State<MapScreen> {
                 FloatingActionButton.small(
                   heroTag: 'map_center',
                   onPressed: _centerMap,
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.textPrimary,
+                  backgroundColor: cardBgColor,
+                  foregroundColor: primaryTextColor,
                   child: const Icon(Icons.my_location),
                 ),
                 const SizedBox(height: 8),
                 FloatingActionButton.small(
                   heroTag: 'map_layers',
-                  onPressed: () {},
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.textPrimary,
+                  onPressed: _showLayerOptions,
+                  backgroundColor: cardBgColor,
+                  foregroundColor: primaryTextColor,
                   child: const Icon(Icons.layers_outlined),
                 ),
               ],
             ),
           ),
-
-          // Bottom Sheet / Legend Card
           Positioned(
             bottom: 20,
             left: 20,
@@ -209,11 +270,12 @@ class _MapScreenState extends State<MapScreen> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardBgColor,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: borderColor),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   )
@@ -223,17 +285,17 @@ class _MapScreenState extends State<MapScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     'Active Zones',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryTextColor),
                   ),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildLegendItem(Icons.water_drop, Colors.blue, 'Floods'),
-                      _buildLegendItem(Icons.home, Colors.green, 'Shelters'),
-                      _buildLegendItem(Icons.remove_road, Colors.red, 'Blocked'),
+                      _buildLegendItem(Icons.water_drop, infoColor, 'Floods', secondaryTextColor),
+                      _buildLegendItem(Icons.home, successColor, 'Shelters', secondaryTextColor),
+                      _buildLegendItem(Icons.remove_road, errorColor, 'Blocked', secondaryTextColor),
                     ],
                   ),
                 ],
@@ -246,13 +308,15 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Widget _buildLegendItem(IconData icon, Color color, String label) {
+  Widget _buildLegendItem(IconData icon, Color color, String label, Color textColor) {
     return Row(
       children: [
         Icon(icon, color: color, size: 20),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+        Text(label, style: TextStyle(fontSize: 13, color: textColor, fontWeight: FontWeight.w500)),
       ],
     );
   }
 }
+
+
