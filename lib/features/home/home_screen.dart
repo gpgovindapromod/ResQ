@@ -518,22 +518,33 @@ class ShelterCard extends StatelessWidget {
                         style: TextStyle(color: primaryTextColor, fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
-                          Icon(Icons.directions_walk, size: 14, color: secondaryTextColor),
-                          const SizedBox(width: 4),
-                          Text(
-                            shelter.distance,
-                            style: TextStyle(color: secondaryTextColor, fontSize: 12),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.directions_walk, size: 14, color: secondaryTextColor),
+                              const SizedBox(width: 4),
+                              Text(
+                                shelter.distance,
+                                style: TextStyle(color: secondaryTextColor, fontSize: 12),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context).translate('empty_string'), style: TextStyle(color: borderColor, fontSize: 12)),
-                          const SizedBox(width: 8),
-                          Icon(Icons.people_outline, size: 14, color: secondaryTextColor),
-                          const SizedBox(width: 4),
-                          Text(
-                            shelter.capacity,
-                            style: TextStyle(color: capacityColor, fontSize: 12, fontWeight: FontWeight.w600),
+                          Text('•', style: TextStyle(color: borderColor, fontSize: 12)),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.people_outline, size: 14, color: secondaryTextColor),
+                              const SizedBox(width: 4),
+                              Text(
+                                shelter.capacity,
+                                style: TextStyle(color: capacityColor, fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
+                            ],
                           ),
                         ],
                       ),

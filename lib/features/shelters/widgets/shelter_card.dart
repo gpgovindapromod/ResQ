@@ -50,7 +50,7 @@ class ShelterCard extends StatelessWidget {
         border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -83,7 +83,7 @@ class ShelterCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: shelter.statusColor.withValues(alpha: 0.15),
+                        color: shelter.statusColor.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -158,8 +158,11 @@ class ShelterCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
               border: Border(top: BorderSide(color: borderColor)),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 TextButton(
                   onPressed: () {
@@ -170,21 +173,30 @@ class ShelterCard extends StatelessWidget {
                       ),
                     );
                   },
-                  style: TextButton.styleFrom(foregroundColor: primaryColor),
-                  child: Text(AppLocalizations.of(context).translate('view_details'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  style: TextButton.styleFrom(
+                    foregroundColor: primaryColor,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context).translate('view_details'),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pushNamed(context, AppRouter.map);
                   },
                   icon: const Icon(Icons.directions, size: 18),
-                  label: Text(AppLocalizations.of(context).translate('directions'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  label: Text(
+                    AppLocalizations.of(context).translate('directions'),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     foregroundColor: onPrimaryColor,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   ),
                 ),
               ],

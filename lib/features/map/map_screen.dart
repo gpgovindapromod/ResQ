@@ -182,14 +182,9 @@ class _MapScreenState extends State<MapScreen> {
               initialZoom: 13.0,
             ),
             children: [
-              OverlayImageLayer(
-                overlayImages: [
-                  OverlayImage(
-                    bounds: LatLngBounds(const LatLng(8.8500, 76.5800), const LatLng(8.9300, 76.6500)),
-                    imageProvider: const AssetImage('assets/images/kollam_map.jpg'),
-                    opacity: 0.8,
-                  ),
-                ],
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.example.resq',
               ),
               MarkerLayer(
                 markers: [

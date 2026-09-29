@@ -5,6 +5,8 @@ import '../../shared/widgets/universal_nav_bar.dart';
 import '../../core/routes/app_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/localization/app_localizations.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class ShelterDetailsScreen extends StatelessWidget {
   final ShelterModel shelter;
@@ -262,20 +264,40 @@ class ShelterDetailsScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     SizedBox(
-                      height: 120,
+                      height: 180,
                       child: ClipRRect(
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.getSurface(context),
-                            image: const DecorationImage(
-                              image: AssetImage('assets/images/map_bg.jpg'),
-                              fit: BoxFit.cover,
+                        child: FlutterMap(
+                          options: const MapOptions(
+                            initialCenter: LatLng(8.8932, 76.6141),
+                            initialZoom: 14.5,
+                            interactionOptions: InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              userAgentPackageName: 'com.example.resq',
                             ),
-                          ),
-                          child: Center(
-                            child: Icon(Icons.map_outlined, color: secondaryTextColor, size: 32),
-                          ),
+                            MarkerLayer(
+                              markers: [
+                                Marker(
+                                  point: const LatLng(8.8932, 76.6141),
+                                  width: 40,
+                                  height: 40,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: errorColor,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 4),
+                                      ],
+                                    ),
+                                    child: const Icon(Icons.night_shelter, color: Colors.white, size: 22),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),

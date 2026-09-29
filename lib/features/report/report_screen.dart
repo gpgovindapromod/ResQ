@@ -4,11 +4,12 @@ import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/universal_header.dart';
 import '../../shared/widgets/universal_nav_bar.dart';
 import 'dart:io';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'widgets/incident_type_selector.dart';
+import 'widgets/location_selector_card.dart';
+import 'widgets/photo_upload_card.dart';
 import '../../core/localization/app_localizations.dart';
 
 class ReportScreen extends StatefulWidget {
@@ -214,156 +215,22 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              _buildCardContainer(
-                cardBgColor: cardBgColor,
-                borderColor: borderColor,
+              LocationSelectorCard(
+                currentPosition: _currentPosition,
+                locationName: _locationName,
+                isLoadingLocation: _isLoadingLocation,
+                onUpdateLocation: () {
+                  setState(() { _isLoadingLocation = true; });
+                  _determinePosition();
+                },
                 isDark: isDark,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(AppLocalizations.of(context).translate('current_location'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() { _isLoadingLocation = true; });
-                            _determinePosition();
-                          },
-                          child: Row(
-                            children: [
-                              Icon(Icons.my_location, size: 16, color: primaryColor),
-                              const SizedBox(width: 4),
-                              Text(AppLocalizations.of(context).translate('update'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryColor)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      height: 160,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: AppColors.getSurface(context),
-                        border: Border.all(color: borderColor),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: _isLoadingLocation 
-                        ? Center(child: CircularProgressIndicator(color: primaryColor))
-                        : _currentPosition == null
-                          ? Center(child: Text(AppLocalizations.of(context).translate('could_not_load_map'), style: TextStyle(color: secondaryTextColor)))
-                          : FlutterMap(
-                              options: MapOptions(
-                                initialCenter: _currentPosition!,
-                                initialZoom: 15.0,
-                                interactionOptions: const InteractionOptions(flags: InteractiveFlag.all),
-                              ),
-                              children: [
-                                OverlayImageLayer(
-                                  overlayImages: [
-                                    OverlayImage(
-                                      bounds: LatLngBounds(const LatLng(8.8500, 76.5800), const LatLng(8.9300, 76.6500)),
-                                      imageProvider: const AssetImage('assets/images/kollam_map.jpg'),
-                                      opacity: 0.8,
-                                    ),
-                                  ],
-                                ),
-                                MarkerLayer(
-                                  markers: [
-                                    Marker(
-                                      point: _currentPosition!,
-                                      width: 40,
-                                      height: 40,
-                                      child: Icon(Icons.location_on, color: errorColor, size: 40),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Icon(Icons.pin_drop_outlined, size: 18, color: secondaryTextColor),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _locationName,
-                            style: TextStyle(fontSize: 14, color: secondaryTextColor),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
               ),
               const SizedBox(height: 16),
-              _buildCardContainer(
-                cardBgColor: cardBgColor,
-                borderColor: borderColor,
+              PhotoUploadCard(
+                imageFile: _imageFile,
+                onPickImage: _pickImage,
+                onClearImage: () => setState(() => _imageFile = null),
                 isDark: isDark,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(AppLocalizations.of(context).translate('attach_photo'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
-                    const SizedBox(height: 12),
-                    Container(
-                      height: 112,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: cardBgColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: _imageFile != null
-                          ? Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.file(_imageFile!, fit: BoxFit.cover, width: double.infinity, height: 112),
-                                ),
-                                Positioned(
-                                  top: 8,
-                                  right: 8,
-                                  child: GestureDetector(
-                                    onTap: () => setState(() => _imageFile = null),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.black54,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(Icons.close, color: Colors.white, size: 20),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: _pickImage,
-                                borderRadius: BorderRadius.circular(8),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(color: borderColor, width: 2),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.add_a_photo_outlined, size: 28, color: secondaryTextColor),
-                                      const SizedBox(height: 8),
-                                      Text(AppLocalizations.of(context).translate('tap_upload_photo'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: secondaryTextColor)),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                    ),
-                  ],
-                ),
               ),
               const SizedBox(height: 16),
               _buildCardContainer(
@@ -461,8 +328,4 @@ class _ReportScreenState extends State<ReportScreen> {
       child: child,
     );
   }
-
-
 }
-
-
