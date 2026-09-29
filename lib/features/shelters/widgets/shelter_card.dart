@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/routes/app_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../shelter_details_screen.dart';
 
 class ShelterModel {
@@ -98,7 +99,7 @@ class ShelterCard extends StatelessWidget {
                     Icon(Icons.location_on_outlined, size: 16, color: secondaryTextColor),
                     const SizedBox(width: 4),
                     Text(
-                      '${shelter.distance} away',
+                      '${shelter.distance} ${AppLocalizations.of(context).translate('away')}',
                       style: TextStyle(fontSize: 14, color: secondaryTextColor),
                     ),
                   ],
@@ -107,7 +108,7 @@ class ShelterCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Capacity', style: TextStyle(fontSize: 13, color: secondaryTextColor)),
+                    Text(AppLocalizations.of(context).translate('capacity'), style: TextStyle(fontSize: 13, color: secondaryTextColor)),
                     Text('${shelter.currentCapacity} / ${shelter.maxCapacity}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: primaryTextColor)),
                   ],
                 ),
@@ -170,14 +171,14 @@ class ShelterCard extends StatelessWidget {
                     );
                   },
                   style: TextButton.styleFrom(foregroundColor: primaryColor),
-                  child: const Text('View Details', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text(AppLocalizations.of(context).translate('view_details'), style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pushNamed(context, AppRouter.map);
                   },
                   icon: const Icon(Icons.directions, size: 18),
-                  label: const Text('Directions', style: TextStyle(fontWeight: FontWeight.bold)),
+                  label: Text(AppLocalizations.of(context).translate('directions'), style: const TextStyle(fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,
                     foregroundColor: onPrimaryColor,

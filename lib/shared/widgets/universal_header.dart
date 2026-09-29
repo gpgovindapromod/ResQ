@@ -33,8 +33,7 @@ class UniversalHeader extends StatelessWidget implements PreferredSizeWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Emergency Broadcasts',
+                Text(AppLocalizations.of(context).translate('emergency_broadcasts'),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -53,23 +52,20 @@ class UniversalHeader extends StatelessWidget implements PreferredSizeWidget {
                 backgroundColor: AppColors.getErrorBg(context),
                 child: Icon(Icons.warning, color: AppColors.getError(context)),
               ),
-              title: Text(
-                'Flood Warning - Kollam Sector 4',
+              title: Text(AppLocalizations.of(context).translate('flood_warning_kollam_sector_4'),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   color: AppColors.getTextPrimary(context),
                 ),
               ),
-              subtitle: Text(
-                'Water levels rising near river basin. Evacuate to high ground.',
+              subtitle: Text(AppLocalizations.of(context).translate('water_levels_rising_near_river'),
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.getTextSecondary(context),
                 ),
               ),
-              trailing: Text(
-                '10m ago',
+              trailing: Text(AppLocalizations.of(context).translate('10m_ago'),
                 style: TextStyle(
                   fontSize: 11,
                   color: AppColors.getTextSecondary(context),
@@ -86,23 +82,20 @@ class UniversalHeader extends StatelessWidget implements PreferredSizeWidget {
                 backgroundColor: AppColors.getInfoBg(context),
                 child: Icon(Icons.night_shelter, color: AppColors.getInfo(context)),
               ),
-              title: Text(
-                'Shelter Opened: Govt High School',
+              title: Text(AppLocalizations.of(context).translate('shelter_opened_govt_high_schoo'),
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   color: AppColors.getTextPrimary(context),
                 ),
               ),
-              subtitle: Text(
-                'Capacity: 120/400. Food and medical aid available.',
+              subtitle: Text(AppLocalizations.of(context).translate('capacity_120_400_food_and_medi'),
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.getTextSecondary(context),
                 ),
               ),
-              trailing: Text(
-                '1h ago',
+              trailing: Text(AppLocalizations.of(context).translate('1h_ago'),
                 style: TextStyle(
                   fontSize: 11,
                   color: AppColors.getTextSecondary(context),

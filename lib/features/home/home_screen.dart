@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location services are disabled. Please enable them in your device settings.')),
+          SnackBar(content: Text(AppLocalizations.of(context).translate('location_services_are_disabled'))),
         );
       }
       return;
@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
         });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied. We cannot fetch your current city.')),
+            SnackBar(content: Text(AppLocalizations.of(context).translate('location_permissions_are_denie'))),
           );
         }
         return;
@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permissions are permanently denied, we cannot request permissions.')),
+          SnackBar(content: Text(AppLocalizations.of(context).translate('location_permissions_are_perma'))),
         );
       }
       return;
@@ -441,8 +441,7 @@ class AlertCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'ROAD CLOSURE',
+                    Text(AppLocalizations.of(context).translate('road_closure'),
                       style: TextStyle(color: errorColor, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                     ),
                     const SizedBox(height: 8),
@@ -528,7 +527,7 @@ class ShelterCard extends StatelessWidget {
                             style: TextStyle(color: secondaryTextColor, fontSize: 12),
                           ),
                           const SizedBox(width: 8),
-                          Text('•', style: TextStyle(color: borderColor, fontSize: 12)),
+                          Text(AppLocalizations.of(context).translate('empty_string'), style: TextStyle(color: borderColor, fontSize: 12)),
                           const SizedBox(width: 8),
                           Icon(Icons.people_outline, size: 14, color: secondaryTextColor),
                           const SizedBox(width: 4),

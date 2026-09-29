@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/routes/app_router.dart';
+import '../../core/localization/app_localizations.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -83,8 +84,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                'ResQ',
+              Text(AppLocalizations.of(context).translate('resq'),
                 style: Theme.of(context).textTheme.displayLarge?.copyWith(
                   fontSize: 26,
                   color: primaryColor,
@@ -93,8 +93,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 ),
               ),
               const SizedBox(height: 6),
-              Text(
-                'Access your emergency response dashboard.',
+              Text(AppLocalizations.of(context).translate('access_your_emergency_response'),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   fontSize: 15,
@@ -128,9 +127,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         indicatorColor: primaryColor,
                         indicatorWeight: 3,
                         dividerColor: borderColor,
-                        tabs: const [
-                          Tab(text: 'Login'),
-                          Tab(text: 'Sign Up'),
+                        tabs: [
+                          Tab(text: AppLocalizations.of(context).translate('login')),
+                          Tab(text: AppLocalizations.of(context).translate('sign_up')),
                         ],
                       ),
                     ),
@@ -162,7 +161,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Email or Phone Number',
+            AppLocalizations.of(context).translate('email_or_phone'),
             style: TextStyle(fontWeight: FontWeight.bold, color: primaryTextColor, fontSize: 13),
           ),
           const SizedBox(height: 6),
@@ -191,7 +190,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 16),
           Text(
-            'Password',
+            AppLocalizations.of(context).translate('password'),
             style: TextStyle(fontWeight: FontWeight.bold, color: primaryTextColor, fontSize: 13),
           ),
           const SizedBox(height: 6),
@@ -240,11 +239,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   context: context,
                   builder: (context) => AlertDialog(
                     backgroundColor: AppColors.getSurface(context),
-                    title: Text('Reset Password', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryTextColor)),
+                    title: Text(AppLocalizations.of(context).translate('reset_password'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryTextColor)),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Enter your registered email or phone number to receive a recovery link.', style: TextStyle(fontSize: 13, color: secondaryTextColor)),
+                        Text(AppLocalizations.of(context).translate('enter_your_registered_email_or'), style: TextStyle(fontSize: 13, color: secondaryTextColor)),
                         const SizedBox(height: 12),
                         TextField(
                           controller: emailController,
@@ -261,14 +260,14 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: Text('Cancel', style: TextStyle(color: secondaryTextColor)),
+                        child: Text(AppLocalizations.of(context).translate('cancel'), style: TextStyle(color: secondaryTextColor)),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('Password reset instructions sent to your email!'),
+                              content: Text(AppLocalizations.of(context).translate('password_reset_instructions_se')),
                               backgroundColor: primaryColor,
                             ),
                           );
@@ -277,7 +276,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                           backgroundColor: primaryColor,
                           foregroundColor: onPrimaryColor,
                         ),
-                        child: const Text('Send Link'),
+                        child: Text(AppLocalizations.of(context).translate('send_link')),
                       ),
                     ],
                   ),
@@ -289,7 +288,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 minimumSize: Size.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-              child: const Text('Forgot Password?', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+              child: Text(AppLocalizations.of(context).translate('forgot_password'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
             ),
           ),
           const SizedBox(height: 24),
@@ -309,7 +308,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Sign In', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                Text(AppLocalizations.of(context).translate('sign_in'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 const SizedBox(width: 8),
                 Icon(Icons.arrow_forward, size: 18, color: onPrimaryColor),
               ],
@@ -327,7 +326,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Full Name',
+            AppLocalizations.of(context).translate('full_name'),
             style: TextStyle(fontWeight: FontWeight.bold, color: primaryTextColor, fontSize: 13),
           ),
           const SizedBox(height: 6),
@@ -355,7 +354,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 16),
           Text(
-            'Email Address',
+            AppLocalizations.of(context).translate('email_address'),
             style: TextStyle(fontWeight: FontWeight.bold, color: primaryTextColor, fontSize: 13),
           ),
           const SizedBox(height: 6),
@@ -383,7 +382,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           ),
           const SizedBox(height: 16),
           Text(
-            'Password',
+            AppLocalizations.of(context).translate('password'),
             style: TextStyle(fontWeight: FontWeight.bold, color: primaryTextColor, fontSize: 13),
           ),
           const SizedBox(height: 6),
@@ -438,7 +437,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Sign Up', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                Text(AppLocalizations.of(context).translate('sign_up'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 const SizedBox(width: 8),
                 Icon(Icons.arrow_forward, size: 18, color: onPrimaryColor),
               ],

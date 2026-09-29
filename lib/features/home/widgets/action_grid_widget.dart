@@ -107,8 +107,7 @@ class ActionGridWidget extends StatelessWidget {
                               loc.translate('disaster_control'),
                               style: TextStyle(fontWeight: FontWeight.bold, color: primaryTextColor),
                             ),
-                            subtitle: Text(
-                              '1077 / +91 474 2794002',
+                            subtitle: Text(AppLocalizations.of(context).translate('1077_91_474_2794002'),
                               style: TextStyle(color: AppColors.getTextSecondary(context)),
                             ),
                             trailing: Icon(Icons.call, color: primaryColor),
@@ -123,8 +122,7 @@ class ActionGridWidget extends StatelessWidget {
                               loc.translate('ambulance_rescue'),
                               style: TextStyle(fontWeight: FontWeight.bold, color: primaryTextColor),
                             ),
-                            subtitle: Text(
-                              '108 (Toll-Free)',
+                            subtitle: Text(AppLocalizations.of(context).translate('108_toll_free'),
                               style: TextStyle(color: AppColors.getTextSecondary(context)),
                             ),
                             trailing: Icon(Icons.call, color: primaryColor),
@@ -139,8 +137,7 @@ class ActionGridWidget extends StatelessWidget {
                               loc.translate('fire_force'),
                               style: TextStyle(fontWeight: FontWeight.bold, color: primaryTextColor),
                             ),
-                            subtitle: Text(
-                              '101',
+                            subtitle: Text(AppLocalizations.of(context).translate('101'),
                               style: TextStyle(color: AppColors.getTextSecondary(context)),
                             ),
                             trailing: Icon(Icons.call, color: primaryColor),

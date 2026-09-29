@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/localization/app_localizations.dart';
 import 'dart:async';
 import '../../core/routes/app_router.dart';
 import '../../core/theme/app_colors.dart';
@@ -60,16 +61,14 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            Text(
-              'ResQ',
+            Text(AppLocalizations.of(context).translate('resq'),
               style: theme.textTheme.displayLarge?.copyWith(
                 fontSize: 32,
                 color: primaryTextColor,
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              'Predict. Respond. Recover.',
+            Text(AppLocalizations.of(context).translate('predict_respond_recover'),
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: primaryTextColor,
                 fontSize: 18,
@@ -81,8 +80,7 @@ class _SplashScreenState extends State<SplashScreen> {
               strokeWidth: 3,
             ),
             const SizedBox(height: 24),
-            Text(
-              'INITIALIZING CORE SYSTEMS',
+            Text(AppLocalizations.of(context).translate('initializing_core_systems'),
               style: TextStyle(
                 color: primaryColor,
                 fontWeight: FontWeight.bold,
@@ -91,8 +89,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Loading predictive models...',
+            Text(AppLocalizations.of(context).translate('loading_predictive_models'),
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 12,
                 color: AppColors.getTextSecondary(context),

@@ -94,8 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Edit Profile',
+            Text(AppLocalizations.of(context).translate('edit_profile'),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryColor),
             ),
             const SizedBox(height: 16),
@@ -130,7 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: const Text('Profile updated successfully!'),
+                      content: Text(AppLocalizations.of(context).translate('profile_updated')),
                       backgroundColor: primaryColor,
                     ),
                   );
@@ -139,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: primaryColor,
                   foregroundColor: onPrimaryColor,
                 ),
-                child: const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: Text(AppLocalizations.of(context).translate('save_changes'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -450,7 +449,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Active Status',
+                        AppLocalizations.of(context).translate('active_status'),
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: primaryColor),
                       ),
                     ],
@@ -490,12 +489,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: AppColors.getSurface(context),
-            title: Text('Confirm Logout', style: TextStyle(color: AppColors.getTextPrimary(context))),
-            content: Text('Are you sure you want to log out of ResQ?', style: TextStyle(color: AppColors.getTextSecondary(context))),
+            title: Text(AppLocalizations.of(context).translate('confirm_logout'), style: TextStyle(color: AppColors.getTextPrimary(context))),
+            content: Text(AppLocalizations.of(context).translate('are_you_sure_you_want_to_log_o'), style: TextStyle(color: AppColors.getTextSecondary(context))),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text('Cancel', style: TextStyle(color: AppColors.getTextSecondary(context))),
+                child: Text(AppLocalizations.of(context).translate('cancel'), style: TextStyle(color: AppColors.getTextSecondary(context))),
               ),
               ElevatedButton(
                 onPressed: () async {
@@ -509,7 +508,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: errorColor,
                   foregroundColor: onErrorColor,
                 ),
-                child: const Text('Logout'),
+                child: Text(AppLocalizations.of(context).translate('logout')),
               ),
             ],
           ),
@@ -522,12 +521,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(vertical: 14),
         minimumSize: const Size(double.infinity, 48),
       ),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.logout, size: 20),
-          SizedBox(width: 8),
-          Text('Logout', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+          const Icon(Icons.logout, size: 20),
+          const SizedBox(width: 8),
+          Text(AppLocalizations.of(context).translate('logout'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
         ],
       ),
     );

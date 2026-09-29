@@ -9,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'widgets/incident_type_selector.dart';
+import '../../core/localization/app_localizations.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -121,7 +122,7 @@ class _ReportScreenState extends State<ReportScreen> {
             Icon(Icons.check_circle_rounded, color: AppColors.getSuccess(context), size: 28),
             const SizedBox(width: 8),
             Text(
-              'Report Dispatched',
+              AppLocalizations.of(context).translate('report_dispatched'),
               style: TextStyle(color: AppColors.getTextPrimary(context)),
             ),
           ],
@@ -139,7 +140,7 @@ class _ReportScreenState extends State<ReportScreen> {
                 _imageFile = null;
               });
             },
-            child: Text('Close', style: TextStyle(color: AppColors.getTextSecondary(context))),
+            child: Text(AppLocalizations.of(context).translate('close'), style: TextStyle(color: AppColors.getTextSecondary(context))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -150,7 +151,7 @@ class _ReportScreenState extends State<ReportScreen> {
               backgroundColor: AppColors.getPrimary(context),
               foregroundColor: AppColors.getOnPrimary(context),
             ),
-            child: const Text('View Live Map'),
+            child: Text(AppLocalizations.of(context).translate('view_live_map')),
           ),
         ],
       ),
@@ -182,12 +183,12 @@ class _ReportScreenState extends State<ReportScreen> {
             children: [
               const SizedBox(height: 8),
               Text(
-                'Report an Incident',
+                AppLocalizations.of(context).translate('report_incident'),
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: primaryTextColor),
               ),
               const SizedBox(height: 6),
               Text(
-                'Please provide details to help responders assess the situation quickly.',
+                AppLocalizations.of(context).translate('provide_details'),
                 style: TextStyle(fontSize: 14, color: secondaryTextColor, height: 1.4),
               ),
               const SizedBox(height: 16),
@@ -198,7 +199,7 @@ class _ReportScreenState extends State<ReportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Incident Type', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
+                    Text(AppLocalizations.of(context).translate('incident_type'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
                     const SizedBox(height: 12),
                     IncidentTypeSelector(
                       initialValue: _selectedIncidentType,
@@ -223,7 +224,7 @@ class _ReportScreenState extends State<ReportScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Current Location', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
+                        Text(AppLocalizations.of(context).translate('current_location'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
                         GestureDetector(
                           onTap: () {
                             setState(() { _isLoadingLocation = true; });
@@ -233,7 +234,7 @@ class _ReportScreenState extends State<ReportScreen> {
                             children: [
                               Icon(Icons.my_location, size: 16, color: primaryColor),
                               const SizedBox(width: 4),
-                              Text('Update', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryColor)),
+                              Text(AppLocalizations.of(context).translate('update'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryColor)),
                             ],
                           ),
                         ),
@@ -252,7 +253,7 @@ class _ReportScreenState extends State<ReportScreen> {
                       child: _isLoadingLocation 
                         ? Center(child: CircularProgressIndicator(color: primaryColor))
                         : _currentPosition == null
-                          ? Center(child: Text('Could not load map.', style: TextStyle(color: secondaryTextColor)))
+                          ? Center(child: Text(AppLocalizations.of(context).translate('could_not_load_map'), style: TextStyle(color: secondaryTextColor)))
                           : FlutterMap(
                               options: MapOptions(
                                 initialCenter: _currentPosition!,
@@ -306,7 +307,7 @@ class _ReportScreenState extends State<ReportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Attach Photo (Optional)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
+                    Text(AppLocalizations.of(context).translate('attach_photo'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
                     const SizedBox(height: 12),
                     Container(
                       height: 112,
@@ -354,7 +355,7 @@ class _ReportScreenState extends State<ReportScreen> {
                                     children: [
                                       Icon(Icons.add_a_photo_outlined, size: 28, color: secondaryTextColor),
                                       const SizedBox(height: 8),
-                                      Text('Tap to upload a photo', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: secondaryTextColor)),
+                                      Text(AppLocalizations.of(context).translate('tap_upload_photo'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: secondaryTextColor)),
                                     ],
                                   ),
                                 ),
@@ -372,7 +373,7 @@ class _ReportScreenState extends State<ReportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Description', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
+                    Text(AppLocalizations.of(context).translate('description'), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: primaryTextColor)),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _descriptionController,
@@ -424,15 +425,15 @@ class _ReportScreenState extends State<ReportScreen> {
                               child: CircularProgressIndicator(color: onErrorColor, strokeWidth: 2.5),
                             ),
                             const SizedBox(width: 12),
-                            Text('Sending Alert...', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: onErrorColor)),
+                            Text(AppLocalizations.of(context).translate('sending_alert'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: onErrorColor)),
                           ],
                         )
-                      : const Row(
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.warning_amber_rounded, size: 20),
-                            SizedBox(width: 8),
-                            Text('Submit Emergency Report', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                            const Icon(Icons.warning_amber_rounded, size: 20),
+                            const SizedBox(width: 8),
+                            Text(AppLocalizations.of(context).translate('submit_emergency_report'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                           ],
                         ),
                 ),

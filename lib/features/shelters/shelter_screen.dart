@@ -5,6 +5,7 @@ import '../../shared/widgets/universal_header.dart';
 import '../../shared/widgets/universal_nav_bar.dart';
 import 'widgets/shelter_card.dart';
 import 'widgets/filter_chip_widget.dart';
+import '../../core/localization/app_localizations.dart';
 
 class ShelterScreen extends StatefulWidget {
   const ShelterScreen({super.key});
@@ -34,8 +35,8 @@ class _ShelterScreenState extends State<ShelterScreen> {
         currentCapacity: 74,
         maxCapacity: 100,
         amenities: [
-          {'icon': Icons.medical_services_outlined, 'label': 'First Aid'},
-          {'icon': Icons.water_drop_outlined, 'label': 'Water'},
+          {'icon': Icons.medical_services_outlined, 'label': AppLocalizations.of(context).translate('first_aid')},
+          {'icon': Icons.water_drop_outlined, 'label': AppLocalizations.of(context).translate('water')},
         ],
       ),
       ShelterModel(
@@ -46,7 +47,7 @@ class _ShelterScreenState extends State<ShelterScreen> {
         currentCapacity: 240,
         maxCapacity: 250,
         amenities: [
-          {'icon': Icons.pets_outlined, 'label': 'Pets Allowed'},
+          {'icon': Icons.pets_outlined, 'label': AppLocalizations.of(context).translate('pets_allowed')},
         ],
       ),
     ];
@@ -68,16 +69,18 @@ class _ShelterScreenState extends State<ShelterScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Shelter Locator',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryTextColor),
+                      Expanded(
+                        child: Text(
+                          AppLocalizations.of(context).translate('shelter_locator'),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryTextColor),
+                        ),
                       ),
                       OutlinedButton.icon(
                         onPressed: () {
                           Navigator.pushReplacementNamed(context, AppRouter.map);
                         },
                         icon: Icon(Icons.map_outlined, size: 16, color: primaryColor),
-                        label: Text('Map View', style: TextStyle(fontWeight: FontWeight.w600, color: primaryColor)),
+                        label: Text(AppLocalizations.of(context).translate('map_view'), style: TextStyle(fontWeight: FontWeight.w600, color: primaryColor)),
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: borderColor),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -92,7 +95,7 @@ class _ShelterScreenState extends State<ShelterScreen> {
                   TextField(
                     style: TextStyle(color: primaryTextColor),
                     decoration: InputDecoration(
-                      hintText: 'Search for shelters by name or location...',
+                      hintText: AppLocalizations.of(context).translate('search_shelters'),
                       hintStyle: TextStyle(color: secondaryTextColor, fontSize: 13),
                       prefixIcon: Icon(Icons.search, color: secondaryTextColor),
                       filled: true,
@@ -116,14 +119,14 @@ class _ShelterScreenState extends State<ShelterScreen> {
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: const [
-                        FilterChipWidget(label: 'Nearest', isSelected: true),
-                        SizedBox(width: 8),
-                        FilterChipWidget(label: 'Available'),
-                        SizedBox(width: 8),
-                        FilterChipWidget(label: 'Medical', icon: Icons.medical_services_outlined),
-                        SizedBox(width: 8),
-                        FilterChipWidget(label: 'Pets', icon: Icons.pets_outlined),
+                      children: [
+                        FilterChipWidget(label: AppLocalizations.of(context).translate('nearest'), isSelected: true),
+                        const SizedBox(width: 8),
+                        FilterChipWidget(label: AppLocalizations.of(context).translate('available')),
+                        const SizedBox(width: 8),
+                        FilterChipWidget(label: AppLocalizations.of(context).translate('medical'), icon: Icons.medical_services_outlined),
+                        const SizedBox(width: 8),
+                        FilterChipWidget(label: AppLocalizations.of(context).translate('pets'), icon: Icons.pets_outlined),
                       ],
                     ),
                   ),

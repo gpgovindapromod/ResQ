@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../shared/widgets/universal_header.dart';
 import '../../shared/widgets/universal_nav_bar.dart';
+import '../../core/localization/app_localizations.dart';
 
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -86,33 +87,33 @@ class _MapScreenState extends State<MapScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Map Layers & Overlays',
+              AppLocalizations.of(context).translate('map_layers_overlays'),
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryColor),
             ),
             Divider(color: AppColors.getBorder(context)),
             ListTile(
               leading: Icon(Icons.map, color: primaryColor),
-              title: Text('Standard Topo Map', style: TextStyle(color: AppColors.getTextPrimary(context))),
+              title: Text(AppLocalizations.of(context).translate('standard_topo_map'), style: TextStyle(color: AppColors.getTextPrimary(context))),
               trailing: Icon(Icons.check, color: primaryColor),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Standard map layer activated')));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).translate('standard_layer'))));
               },
             ),
             ListTile(
               leading: Icon(Icons.waves, color: infoColor),
-              title: Text('Live Flood Inundation Layer', style: TextStyle(color: AppColors.getTextPrimary(context))),
+              title: Text(AppLocalizations.of(context).translate('live_flood_layer'), style: TextStyle(color: AppColors.getTextPrimary(context))),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Flood overlay refreshed')));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).translate('flood_overlay'))));
               },
             ),
             ListTile(
               leading: Icon(Icons.night_shelter, color: successColor),
-              title: Text('Shelter Locations & Availability', style: TextStyle(color: AppColors.getTextPrimary(context))),
+              title: Text(AppLocalizations.of(context).translate('shelter_locations_availability'), style: TextStyle(color: AppColors.getTextPrimary(context))),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Shelters layer enabled')));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).translate('shelters_layer'))));
               },
             ),
           ],
@@ -126,7 +127,7 @@ class _MapScreenState extends State<MapScreen> {
       _mapController.move(_currentLocation, 14.0);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location permission required')),
+        SnackBar(content: Text(AppLocalizations.of(context).translate('location_permission_required'))),
       );
       _determinePosition();
     }
@@ -168,8 +169,8 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: const UniversalHeader(
-        title: 'Map',
+      appBar: UniversalHeader(
+        title: AppLocalizations.of(context).translate('map'),
         showBackButton: false,
       ),
       body: Stack(
@@ -219,7 +220,7 @@ class _MapScreenState extends State<MapScreen> {
             child: TextField(
               style: TextStyle(color: primaryTextColor),
               decoration: InputDecoration(
-                hintText: 'Search for areas or coordinates...',
+                hintText: AppLocalizations.of(context).translate('search_areas'),
                 hintStyle: TextStyle(color: secondaryTextColor, fontSize: 14),
                 prefixIcon: Icon(Icons.search, color: secondaryTextColor),
                 filled: true,
@@ -286,16 +287,16 @@ class _MapScreenState extends State<MapScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Active Zones',
+                    AppLocalizations.of(context).translate('active_zones'),
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: primaryTextColor),
                   ),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildLegendItem(Icons.water_drop, infoColor, 'Floods', secondaryTextColor),
-                      _buildLegendItem(Icons.home, successColor, 'Shelters', secondaryTextColor),
-                      _buildLegendItem(Icons.remove_road, errorColor, 'Blocked', secondaryTextColor),
+                      _buildLegendItem(Icons.water_drop, infoColor, AppLocalizations.of(context).translate('floods'), secondaryTextColor),
+                      _buildLegendItem(Icons.home, successColor, AppLocalizations.of(context).translate('shelters'), secondaryTextColor),
+                      _buildLegendItem(Icons.remove_road, errorColor, AppLocalizations.of(context).translate('blocked'), secondaryTextColor),
                     ],
                   ),
                 ],
